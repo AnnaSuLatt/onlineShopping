@@ -1,0 +1,269 @@
+#D00320 - Venetian Red
+#E2335E - Cerise
+#EC7094 - Deep Blush
+#F49FB9 - Illusion
+#6E020F - Burgundy
+#B31E3B - Cardinal
+#ef3b68
+
+............................................................
+1.updated_at db choose current timestamp of default value
+
+2.online shopping  folder structure
+-db_connect.php
+-index.php
+-config.php
+-.htacess
+-controllers
+-models
+-view
+-storage
+(Mac,linux => permission)
+
+3).htacess file
+On servers that run Apache (a web server software), the . htaccess file allows you to make changes to your website's configuration without having to edit server configuration files.
+
+............................................................
+MVC Flow
+1)model - database business logic, trasferred between UI AND Model.No html code,include a little php code.CRUD for users.
+
+2)View-presentation,all the UI logic of the application.such as text boxes, dropdowns, etc. that the final user interacts with.
+
+3)Controller-related with VIEW for showing users output to view and keeps users input to controller.
+
+............................
+
+PDOの書き方
+– DSN (Data Source Name)（必須）
+– ユーザー名
+– パスワード
+– オプション
+1.データベースに接続するために必要な情報です．
+$pdo = new PDO($dsn, $username, $password, $driver_options);
+2.接続後にオプションを指定
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+3.SQL実行でエラーが起こった際にどう処理するかを指定します．
+4.Give permission users to mac
+change daemon to Administrator in http.conf
+........................
+
+Config File for link MVC
+1. Link with master path folder-
+$foldername = 'onlineshopping';
+$file_path = $_SERVER['DOCUMENT_ROOT']."/$foldername";
+eg./opt/lampp/htdocs/onlineshopping
+
+2.Link with view file path,db file and view path
+eg.string(36) "http://localhost:8080/onlineshopping"
+
+3.Declare "global variable" from any folder
+golobal $foldername,$file_path,$model_file_path,$view_file_path,$controller_file_path,$database_path,$view_path;
+............
+
+.htaccess file
+
+for running URL,want to hide .php 
+when request is come,whatever you go,auto direct to index.php
+
+............
+Index file 
+
+1.Write layout in view folders
+
+2.Connect view into index.php using require and global varibale of view folders.
+//string(37) "/opt/lampp/htdocs/onlineshoppingview/"
+var_dump($GLOBALS['view_file_path']);
+
+3.Get Directory Path and change string to array using explode('/',$path)
+
+4.Get rounter folder name only from array using if conditions
+
+.............
+Connect Template 
+
+Create Category list
+1.Create backendheader & backendfooter.php
+(from </main> code to </html>) into backendfooter.php
+2.Update css and img path and main CSS(.. and js/ )to "<?php $GLOBALS['view_path']?>template/backend/favicon or /icon 
+3.
+
+.......
+Bootstrap template
+Bootstrap 5 relasease recently so template is not so much and only single page , just bootstrap 4 a lot of template.
+If you download boostrap 4 then you can update it on boostrap js /css 4 to 5 of links, 
+different between (model box - 4 data-toggle="model" , 5 data-bs-toggle='model')
+
+
+Add category
+............
+Add category in db ,and connect to model file
+1.Create class in category_mdl.php
+class name must the same with file name
+2.Create class in category_model.php
+3.Create route for model and control of category file in index.php and config.php, create object.
+4. Connect model into controllers and call getAll();
+5.Write getall() in category_mdl.php , connect db.file for getting PDO
+6.
+			//1.query
+			$sql = "SELECT * FROM categories ORDER BY name ASC";
+			//return query for PDO
+			//2.prepare
+			$stmt = $this->pdo->prepare($sql);
+			//3.parameter / bind (optional) where , no need in select
+			//4.Execute
+			$stmt->execute();
+			//5.fetchall/fetchAssoc
+			$rows = $stmt->fetchall();
+			
+			return $rows;
+7.Connect read() in index.html
+//Category
+	require $GLOBALS['controller_file_path']."Category_ctrl.php";
+	//Create obj
+	$category = new Category_ctrl();
+	var_dump($category->read());
+
+8.Looping the category in category list php view.
+  <?php 
+ $i=1;
+foreach ($categories as $category) {
+$id = $category['id'];
+$name = $category['name'];
+$logo = $category['logo'];
+ ?>
+<tr><td> <?php echo $i++; ?></td>
+<td> <?php echo $name; ?></td>
+  </tr>
+<?php } ?>
+</tbody>
+9.Show category image from view folder with view path /opt/lampp/htdocs/onlineshopping/.
+$logo = $GLOBALS['view_path'].$category['logo'];
+
+.............
+Add Category new page.
+
+1.Click [+] to go in category list
+<ul class="app-breadcrumb breadcrumb side">
+<a href="<?php echo $GLOBALS['view_path'] ?>category_new" class="btn btn-outline-primary">
+    <i class="icofont-plus"></i>
+</a>
+</ul>
+2.In config file,
+elseif ($router == 'category_new'){
+		require $GLOBALS['view_file_path']."category_new.php";
+	}
+3.Copy template/backend/categoryform.html into category_new.php, and add <backedheader.php> & <backendfooter.php>
+4.Copy appcontent inside<main> from template/backend/categoryform.html into category_new.php
+5.Keep add category data into database.
+Image file include so must use POST & memo the input name declare.
+ <form method="POST" enctype="multipart/form-data" action="<?php echo $GLOBALS['view_part'] ?>category_add">
+6.Catch route in index.php with controller
+elseif ($router == 'category_add'){
+		$category->insert();
+		
+	}
+7.Write insert function in model and get category data,set up image upload and path
+8.Connect get data and insert data into category model
+function insert_data($value){
+}
+9.// return $addresult in controller.
+$url = $GLOBALS['view_path'].'category_list]';
+header('location:'.$url);
+
+
+.........
+
+Brand create and read
+
+-like category
+
+
+................
+Navigation link without typing from the address bar
+<a class="app-menu__item" href="<?php echo $GLOBALS['view_path'] ?>brand_list"">
+<i class="app-menu__icon icofont-ui-tag"></i>
+<span class="app-menu__label">
+    Brands 
+</span>
+</a>
+
+..................
+1.Subcategory like create category , change choose options in subcategory-list , read and insert to database using controller and model.
+2.Connect category and subcategory tables relationship with left join and retrieve in subcategory list of table
+...................
+
+Category Edit and delete
+..............
+1. Need to carry id 
+foreg, Get method.
+search? carry parameter with encode format.
+ <a href="<?php echo $GLOBALS['view_path'] ?>category_edit?id=<?php echo $id ?>" class="btn btn-warning">
+
+2.Call id in index.php
+elseif ($router == 'category_edit') {
+		$id = $_GET['id'];
+	}
+
+3.Send id to model and controller
+		$categoryedit = $category-<edit($id);
+
+4.
+function edit($data){} in controller
+function edit_data($id){ in model
+			$sql = "SELECT * from categories WHER id = :v1 ";
+			$stmt = $this->pdo->prepare($sql);
+			$stmt->bindParam(':v1',$id);
+			$stmt->execute();
+
+			$row = $stmt->fetch(PDO::FETCH_ASSOC);
+			
+		}
+5.Show category data into view
+ctrl+shift+s means copy and create file
+ <form action="<?php echo $GLOBALS['view_part'] ?>category_update" method="POST" enctype="multipart/form-data">
+ 6.Add require in else if condition and add below code into category_edit.php
+  <input type="text" class="form-control" id="name_id" name="name" value="<?php echo $categoryedit['name'] ?>">
+7.Show old and new photo infowith cart component of boostrap and change version 4.5
+https://getbootstrap.com/docs/4.6/components/navs/
+<img src="<?php echo $GLOBALS['view_part'].$categoryedit['logo'] ?>"></div>
+
+Update Category
+..........
+1. For update edit data ,need to carry hidden id 
+<input type="hidden" name="id" value="<?php echo $categoryedit['id'] ?>">
+<input type="hidden" name="oldphoto" value="<?php echo $categoryedit['logo'] ?>">
+
+<form action="<?php echo $GLOBALS['view_part'] ?>category_update" method="POST" enctype="multipart/form-data">
+
+2.Need to check condition for old or new folder in db?
+3.Navigate to header link
+.....
+
+
+1.Brandရဲ့ edit,update
+2.Subcategory ရဲ့ edit,update
+3.Item ရဲ့ create,read,edit,update
+4.localhost/မိမိfoldername/ ကိုrunတာနဲ့ homepage ကိုပြပေးရမယ်
+5.Add dummy data 
+
+......
+
+Show randomitem with random(), discount item not equal "", rentely flash hot new items  sale discount item descending by id or date
+
+photo with view path .
+
+////
+
+Shopping card
+......
+localstorage for get card data info
+
+
+....
+
+User and roles 
+
+1.login
+2.users and roles(admin,customer) table has no foreign key,so use model has roles tables
+
